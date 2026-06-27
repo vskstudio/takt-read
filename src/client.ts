@@ -28,6 +28,9 @@ export default class TaktClient {
     } catch {
       throw new TaktError(0, 'config_invalide', 'baseUrl invalide');
     }
+    if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
+      throw new TaktError(0, 'config_invalide', 'baseUrl doit utiliser le schéma http(s)');
+    }
 
     const fetchImpl = options.fetch ?? globalThis.fetch;
     if (typeof fetchImpl !== 'function') {

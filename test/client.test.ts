@@ -33,6 +33,12 @@ describe('TaktClient', () => {
     expect(() => client({ baseUrl: 'not a url' })).toThrowError(/baseUrl invalide/);
   });
 
+  it('rejects a non-http(s) baseUrl scheme', () => {
+    for (const baseUrl of ['file:///etc/passwd', 'ftp://host/x', 'javascript:alert(1)']) {
+      expect(() => client({ baseUrl })).toThrowError(/schéma http/);
+    }
+  });
+
   it('drives a real call through the stats resource', async () => {
     const calls: string[] = [];
     const spy: typeof fetch = async (input) => {
