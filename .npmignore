@@ -1,0 +1,8 @@
+src
+test
+openapi
+.changeset
+.github
+*.config.ts
+*.config.js
+tsconfig.json
