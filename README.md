@@ -16,41 +16,52 @@ Requires Node.js 18+ (uses the global `fetch`).
 ## Quick start
 
 ```ts
-import { createClient } from '@vskstudio/takt-read';
+import TaktClient from '@vskstudio/takt-read';
 
-const takt = createClient({
+const takt = new TaktClient({
   apiKey: process.env.TAKT_API_KEY!, // secret — keep it server-side
   domain: 'example.com',
   baseUrl: 'https://your-takt-instance.example/api/v1',
+  timeoutMs: 30_000, // optional, default 30s
+  retries: 2, // optional, default 2 (retries 429 + 5xx with backoff)
 });
 
-const summary = await takt.summary({ period: '30d' });
+const summary = await takt.stats.summary({ period: '30d' });
 console.log(summary.visitors, summary.pageviews);
 ```
 
-`baseUrl` is required: point it at your Takt instance's `/api/v1` root.
+`baseUrl` is required: point it at your Takt instance's `/api/v1` root. The constructor
+validates options and throws a `TaktError` (`code: 'config_invalide'`) on bad input.
 
-## Methods
+## Stats methods
+
+All read endpoints live under `takt.stats`. Each method takes an optional final
+`{ signal }` argument for cancellation via an `AbortController`.
 
 | Method | Returns |
 | --- | --- |
-| `summary(query?)` | `StatsSummary` |
-| `timeseries(query?)` | `StatsTimeseries` |
-| `breakdown(query & { dimension })` | `StatsBreakdown` |
-| `realtime()` | `StatsRealtime` |
-| `goals(query?)` | `StatsGoals` |
-| `funnels(query?)` | `FunnelReports` |
-| `properties(event, query?)` | `string[]` |
-| `propertyBreakdown(event, key, query?)` | `PropertyBreakdown` |
-| `propertyBreakdownBatch(request, query?)` | `PropertyBatchResponse` |
-| `revenue(event, query?)` | `RevenueByCurrency` |
+| `stats.summary(query?)` | `StatsSummary` |
+| `stats.timeseries(query?)` | `StatsTimeseries` |
+| `stats.breakdown(query & { dimension })` | `StatsBreakdown` |
+| `stats.realtime()` | `StatsRealtime` |
+| `stats.goals(query?)` | `StatsGoals` |
+| `stats.funnels(query?)` | `FunnelReports` |
+| `stats.properties(event, query?)` | `string[]` |
+| `stats.propertyBreakdown(event, key, query?)` | `PropertyBreakdown` |
+| `stats.propertyBreakdownBatch(request, query?)` | `PropertyBatchResponse` |
+| `stats.revenue(event, query?)` | `RevenueByCurrency` |
+
+```ts
+const ac = new AbortController();
+const realtime = await takt.stats.realtime({ signal: ac.signal });
+```
 
 ## Query options
 
 All read methods accept an optional `StatsQuery`:
 
 ```ts
-await takt.timeseries({
+await takt.stats.timeseries({
   period: '30d',          // 'day' | '7d' | '30d' | 'month' | '6mo' | '12mo'
   interval: 'day',        // 'hour' | 'day' | 'week' | 'month'
   tz: 'Europe/Paris',
@@ -73,7 +84,7 @@ Non-2xx responses throw a `TaktError` carrying the HTTP status and the API's err
 import { TaktError } from '@vskstudio/takt-read';
 
 try {
-  await takt.summary();
+  await takt.stats.summary();
 } catch (err) {
   if (err instanceof TaktError) {
     console.error(err.status, err.code, err.message);
@@ -107,22 +118,25 @@ Nécessite Node.js 18+ (utilise le `fetch` global).
 ## Démarrage rapide
 
 ```ts
-import { createClient } from '@vskstudio/takt-read';
+import TaktClient from '@vskstudio/takt-read';
 
-const takt = createClient({
+const takt = new TaktClient({
   apiKey: process.env.TAKT_API_KEY!, // secret — à garder côté serveur
   domain: 'example.com',
   baseUrl: 'https://votre-instance-takt.example/api/v1',
+  timeoutMs: 30_000, // optionnel, 30s par défaut
+  retries: 2, // optionnel, 2 par défaut (réessaie 429 + 5xx avec backoff)
 });
 
-const resume = await takt.summary({ period: '30d' });
+const resume = await takt.stats.summary({ period: '30d' });
 ```
 
 `baseUrl` est obligatoire : pointez-le vers la racine `/api/v1` de votre instance Takt.
+Les méthodes vivent sous `takt.stats` et acceptent un `{ signal }` final pour l'annulation.
 
 ## Gestion des erreurs
 
-Les réponses non-2xx lèvent une `TaktError` portant le statut HTTP et le code d'erreur de l'API (par exemple `quota_api_depasse` lorsque le quota de lecture est dépassé).
+Les réponses non-2xx lèvent une `TaktError` portant le statut HTTP et le code d'erreur de l'API (par exemple `quota_api_depasse` lorsque le quota de lecture est dépassé). Le constructeur valide ses options et lève une `TaktError` (`config_invalide`) en cas d'entrée invalide ; un dépassement de délai lève le code `timeout`, une panne réseau `erreur_reseau`.
 
 ## Licence
 

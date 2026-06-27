@@ -1,4 +1,4 @@
-export class TaktError extends Error {
+export default class TaktError extends Error {
   readonly status: number;
   readonly code: string;
   readonly details?: string[];
@@ -10,29 +10,20 @@ export class TaktError extends Error {
     this.code = code;
     this.details = details;
   }
-}
 
-// L'API renvoie les erreurs sous la forme { error: { code, message, details? } }.
-interface ErrorBody {
-  error?: {
-    code?: string;
-    message?: string;
-    details?: string[];
-  };
-}
-
-export async function errorFromResponse(res: Response): Promise<TaktError> {
-  let body: ErrorBody = {};
-  try {
-    body = (await res.json()) as ErrorBody;
-  } catch {
-    // corps non-JSON : on garde les valeurs par défaut
+  static async fromResponse(res: Response): Promise<TaktError> {
+    let body: { error?: { code?: string; message?: string; details?: string[] } } = {};
+    try {
+      body = (await res.json()) as typeof body;
+    } catch {
+      // corps non-JSON
+    }
+    const e = body.error ?? {};
+    return new TaktError(
+      res.status,
+      e.code ?? 'erreur_http',
+      e.message ?? res.statusText ?? 'erreur HTTP',
+      e.details,
+    );
   }
-  const e = body.error ?? {};
-  return new TaktError(
-    res.status,
-    e.code ?? 'erreur_http',
-    e.message ?? res.statusText ?? 'erreur HTTP',
-    e.details,
-  );
 }

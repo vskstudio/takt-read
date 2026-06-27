@@ -1,8 +1,9 @@
-export { createClient } from './client';
-export type { ClientOptions, TaktReadClient } from './client';
-export { TaktError } from './errors';
+export { default, default as TaktClient } from './client';
+export type { TaktClientOptions } from './client';
+export { default as TaktError } from './errors';
+export { default as StatsResource } from './resources/stats';
+export type { CallOptions } from './resources/stats';
 export type { StatsQuery, SegmentFilter, Period, Interval } from './query';
-export { toSearchParams } from './query';
 export type {
   StatsSummary,
   StatsSummaryFigures,
