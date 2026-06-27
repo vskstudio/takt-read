@@ -1,7 +1,5 @@
-// Types des réponses de l'API de lecture Takt (/api/v1/sites/{domain}/stats/*).
-// Écrits à la main pour rester fidèles aux DTO backend SANS vendorer le spec
-// OpenAPI privé. Les noms de champs reflètent exactement le JSON émis par l'API.
-// Les compteurs int64 sont des `number` côté JS (mesures analytiques bornées).
+// Réponses de l'API de lecture Takt (/api/v1/sites/{domain}/stats/*).
+// Les noms de champs reflètent exactement le JSON émis par le backend.
 
 export interface StatsSummaryFigures {
   visitors: number;
