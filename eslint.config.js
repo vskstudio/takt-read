@@ -2,7 +2,7 @@ import tseslint from '@typescript-eslint/eslint-plugin';
 import tsparser from '@typescript-eslint/parser';
 
 export default [
-  { ignores: ['dist', 'src/types.gen.ts'] },
+  { ignores: ['dist'] },
   {
     files: ['**/*.ts'],
     languageOptions: { parser: tsparser },
