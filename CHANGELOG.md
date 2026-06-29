@@ -1,6 +1,6 @@
 # @vskstudio/takt-read
 
-## Unreleased
+## 0.2.0
 
 ### Minor
 
