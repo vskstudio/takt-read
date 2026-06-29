@@ -5,12 +5,19 @@ import StatsResource from './resources/stats';
 export interface TaktClientOptions {
   apiKey: string;
   domain: string;
-  baseUrl: string;
+  /**
+   * Root of the Takt read API. Optional — defaults to the hosted Takt origin
+   * (`https://taktlytics.com`) so the SDK works out of the box. Provide it to
+   * target a self-hosted instance. When provided it must be a valid http(s)
+   * URL; any trailing slash is stripped.
+   */
+  baseUrl?: string;
   fetch?: typeof fetch;
   timeoutMs?: number;
   retries?: number;
 }
 
+const DEFAULT_BASE_URL = 'https://taktlytics.com';
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_RETRIES = 2;
 
@@ -20,11 +27,12 @@ export default class TaktClient {
   constructor(options: TaktClientOptions) {
     if (!options.apiKey) throw new TaktError(0, 'config_invalide', 'apiKey requis');
     if (!options.domain) throw new TaktError(0, 'config_invalide', 'domain requis');
-    if (!options.baseUrl) throw new TaktError(0, 'config_invalide', 'baseUrl requis');
+
+    const baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
 
     let parsed: URL;
     try {
-      parsed = new URL(options.baseUrl);
+      parsed = new URL(baseUrl);
     } catch {
       throw new TaktError(0, 'config_invalide', 'baseUrl invalide');
     }

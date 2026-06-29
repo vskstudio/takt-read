@@ -29,6 +29,28 @@ describe('TaktClient', () => {
     expect(() => client({ domain: '' })).toThrow(TaktError);
   });
 
+  it('defaults baseUrl to the hosted Takt origin when omitted', async () => {
+    const calls: string[] = [];
+    const spy: typeof fetch = async (input) => {
+      calls.push(String(input));
+      return new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } });
+    };
+    const takt = new TaktClient({ apiKey: 'sk', domain: 'example.com', fetch: spy });
+    await takt.stats.summary();
+    expect(calls[0]).toBe('https://taktlytics.com/sites/example.com/stats/summary');
+  });
+
+  it('still validates and normalises an explicit baseUrl', async () => {
+    const calls: string[] = [];
+    const spy: typeof fetch = async (input) => {
+      calls.push(String(input));
+      return new Response('{}', { status: 200, headers: { 'content-type': 'application/json' } });
+    };
+    await client({ baseUrl: 'https://api.takt.test/api/v1/', fetch: spy }).stats.summary();
+    // trailing slash on an explicit baseUrl is normalised away
+    expect(calls[0]).toBe('https://api.takt.test/api/v1/sites/example.com/stats/summary');
+  });
+
   it('rejects an invalid baseUrl', () => {
     expect(() => client({ baseUrl: 'not a url' })).toThrowError(/baseUrl invalide/);
   });

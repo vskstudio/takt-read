@@ -21,7 +21,8 @@ import TaktClient from '@vskstudio/takt-read';
 const takt = new TaktClient({
   apiKey: process.env.TAKT_API_KEY!, // secret — keep it server-side
   domain: 'example.com',
-  baseUrl: 'https://your-takt-instance.example/api/v1',
+  // baseUrl defaults to the hosted Takt origin (https://taktlytics.com).
+  // Set it to target a self-hosted instance, e.g. 'https://your-takt-instance.example/api/v1'.
   timeoutMs: 30_000, // optional, default 30s
   retries: 2, // optional, default 2 (retries 429 + 5xx with backoff)
 });
@@ -30,8 +31,9 @@ const summary = await takt.stats.summary({ period: '30d' });
 console.log(summary.visitors, summary.pageviews);
 ```
 
-`baseUrl` is required: point it at your Takt instance's `/api/v1` root. The constructor
-validates options and throws a `TaktError` (`code: 'config_invalide'`) on bad input.
+`baseUrl` is optional: it defaults to the hosted Takt origin (`https://taktlytics.com`).
+Point it at your own Takt instance's `/api/v1` root to target a self-hosted deployment.
+The constructor validates options and throws a `TaktError` (`code: 'config_invalide'`) on bad input.
 
 ## Stats methods
 
@@ -123,7 +125,8 @@ import TaktClient from '@vskstudio/takt-read';
 const takt = new TaktClient({
   apiKey: process.env.TAKT_API_KEY!, // secret — à garder côté serveur
   domain: 'example.com',
-  baseUrl: 'https://votre-instance-takt.example/api/v1',
+  // baseUrl pointe par défaut vers l'origine Takt hébergée (https://taktlytics.com).
+  // Renseignez-le pour cibler une instance auto-hébergée, ex. 'https://votre-instance-takt.example/api/v1'.
   timeoutMs: 30_000, // optionnel, 30s par défaut
   retries: 2, // optionnel, 2 par défaut (réessaie 429 + 5xx avec backoff)
 });
@@ -131,7 +134,8 @@ const takt = new TaktClient({
 const resume = await takt.stats.summary({ period: '30d' });
 ```
 
-`baseUrl` est obligatoire : pointez-le vers la racine `/api/v1` de votre instance Takt.
+`baseUrl` est optionnel : il pointe par défaut vers l'origine Takt hébergée (`https://taktlytics.com`).
+Renseignez-le avec la racine `/api/v1` de votre propre instance pour cibler un déploiement auto-hébergé.
 Les méthodes vivent sous `takt.stats` et acceptent un `{ signal }` final pour l'annulation.
 
 ## Gestion des erreurs
