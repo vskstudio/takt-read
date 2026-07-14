@@ -103,9 +103,9 @@ describe('StatsResource', () => {
     expect(u.searchParams.get('period')).toBe('7d');
   });
 
-  it('rejects an empty dimensions list without a request', () => {
+  it('rejects an empty dimensions list without a request', async () => {
     const r = recorder();
-    expect(() => r.stats.breakdowns([])).toThrow(/dimension/);
+    await expect(r.stats.breakdowns([])).rejects.toMatchObject({ code: 'config_invalide' });
     expect(r.calls).toHaveLength(0);
   });
 
@@ -128,9 +128,9 @@ describe('StatsResource', () => {
     expect(urlOf(r.calls[0]!).searchParams.get('format')).toBe('json');
   });
 
-  it('requires org for export', () => {
+  it('requires org for export', async () => {
     const r = recorder();
-    expect(() => r.stats.export()).toThrow(/org requis/);
+    await expect(r.stats.export()).rejects.toMatchObject({ code: 'config_invalide' });
     expect(r.calls).toHaveLength(0);
   });
 

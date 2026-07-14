@@ -14,10 +14,7 @@ export interface RequestOptions {
   query?: URLSearchParams;
   body?: unknown;
   signal?: AbortSignal;
-  // Valeur de l'en-tête Accept (défaut application/json). Sert aux exports CSV.
   accept?: string;
-  // Renvoie le corps brut (res.text()) au lieu de le parser en JSON. Utilisé par
-  // l'export CSV, dont la réponse n'est pas du JSON.
   raw?: boolean;
 }
 

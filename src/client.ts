@@ -5,12 +5,6 @@ import StatsResource from './resources/stats';
 export interface TaktClientOptions {
   apiKey: string;
   domain: string;
-  /**
-   * Org slug that owns `domain`. Optional — only required by `stats.export()`, whose route is
-   * org-scoped (`/orgs/:org/sites/:domain/stats/export`). Every other stats method is
-   * domain-scoped and ignores it. Calling `export()` without it throws a `config_invalide`
-   * `TaktError`.
-   */
   org?: string;
   /**
    * Root of the Takt read API — the value the resource paths (`/sites/:domain/stats/...`) are

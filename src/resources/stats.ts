@@ -46,15 +46,13 @@ export default class StatsResource {
     return this.#get('breakdown', query, options);
   }
 
-  // Plusieurs classements en une requête (calculés en parallèle côté serveur,
-  // même cache que breakdown). Renvoie une carte indexée par dimension.
   breakdowns(
     dimensions: string[],
     query: StatsQuery = {},
     options?: CallOptions,
   ): Promise<StatsBreakdowns> {
     if (dimensions.length === 0) {
-      throw new TaktError(0, 'config_invalide', 'au moins une dimension est requise');
+      return Promise.reject(new TaktError(0, 'config_invalide', 'au moins une dimension est requise'));
     }
     return this.#get('breakdowns', query, options, { dimensions: dimensions.join(',') });
   }
@@ -100,8 +98,6 @@ export default class StatsResource {
     return this.#get('revenue', query, options, { event });
   }
 
-  // Export du classement des pages. Format csv (défaut) => chaîne CSV brute ;
-  // format json => lignes typées. Route org-scopée : nécessite `org` au client.
   export(query?: StatsQuery & { format?: 'csv' }, options?: CallOptions): Promise<string>;
   export(query: StatsQuery & { format: 'json' }, options?: CallOptions): Promise<StatsExportRow[]>;
   export(
@@ -109,7 +105,9 @@ export default class StatsResource {
     options?: CallOptions,
   ): Promise<string | StatsExportRow[]> {
     if (!this.#org) {
-      throw new TaktError(0, 'config_invalide', 'org requis pour export : fournissez options.org au client');
+      return Promise.reject(
+        new TaktError(0, 'config_invalide', 'org requis pour export : fournissez options.org au client'),
+      );
     }
     const { format = 'csv', ...rest } = query;
     const params = StatsResource.#params(rest);

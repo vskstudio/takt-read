@@ -43,15 +43,10 @@ export interface StatsBreakdown {
   rows: StatsBreakdownRow[];
 }
 
-// Réponse de /stats/breakdowns : plusieurs classements en une requête, indexés
-// par nom de dimension. Une dimension demandée mais absente de la carte a échoué
-// en moteur (le backend renvoie une carte partielle plutôt qu'une erreur globale).
 export interface StatsBreakdowns {
   breakdowns: Record<string, StatsBreakdown>;
 }
 
-// Ligne d'export (/stats/export en format json). Mêmes champs que le CSV
-// (label,visitors,pageviews) ; compare n'est jamais présent à l'export.
 export interface StatsExportRow {
   label: string;
   visitors: number;
