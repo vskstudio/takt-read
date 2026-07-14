@@ -6,7 +6,7 @@ export type { CallOptions } from './resources/stats';
 export type {
   StatsQuery,
   SegmentFilter,
-  SegmentDimension,
+  StatsDimension,
   SegmentOperator,
   Period,
   Interval,

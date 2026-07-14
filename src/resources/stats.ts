@@ -1,6 +1,6 @@
 import type HttpTransport from '../http/transport';
 import type { RequestOptions } from '../http/transport';
-import type { StatsQuery } from '../query';
+import type { StatsQuery, StatsDimension } from '../query';
 import TaktError from '../errors';
 import type {
   StatsSummary,
@@ -42,12 +42,12 @@ export default class StatsResource {
     return this.#get('timeseries', query, options);
   }
 
-  breakdown(query: StatsQuery & { dimension: string }, options?: CallOptions): Promise<StatsBreakdown> {
+  breakdown(query: StatsQuery & { dimension: StatsDimension }, options?: CallOptions): Promise<StatsBreakdown> {
     return this.#get('breakdown', query, options);
   }
 
   breakdowns(
-    dimensions: string[],
+    dimensions: StatsDimension[],
     query: StatsQuery = {},
     options?: CallOptions,
   ): Promise<StatsBreakdowns> {

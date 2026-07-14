@@ -40,10 +40,10 @@ describe('StatsResource', () => {
 
   it('encodes a single segment without a join', async () => {
     const r = recorder();
-    await r.stats.breakdown({ dimension: 'page', segment: [{ dim: 'countries', op: 'is', val: 'FR' }] });
+    await r.stats.breakdown({ dimension: 'pages', segment: [{ dim: 'countries', op: 'is', val: 'FR' }] });
     const u = urlOf(r.calls[0]!);
     expect(u.pathname).toBe('/api/v1/sites/example.com/stats/breakdown');
-    expect(u.searchParams.get('dimension')).toBe('page');
+    expect(u.searchParams.get('dimension')).toBe('pages');
     expect(u.searchParams.getAll('segment')).toEqual(['countries:is:FR']);
     expect(u.searchParams.getAll('segment_join')).toEqual([]);
   });
@@ -96,10 +96,10 @@ describe('StatsResource', () => {
 
   it('joins dimensions for the batch breakdowns endpoint', async () => {
     const r = recorder({ breakdowns: {} });
-    await r.stats.breakdowns(['pages', 'entry_page'], { period: '7d' });
+    await r.stats.breakdowns(['pages', 'sources'], { period: '7d' });
     const u = urlOf(r.calls[0]!);
     expect(u.pathname).toBe('/api/v1/sites/example.com/stats/breakdowns');
-    expect(u.searchParams.get('dimensions')).toBe('pages,entry_page');
+    expect(u.searchParams.get('dimensions')).toBe('pages,sources');
     expect(u.searchParams.get('period')).toBe('7d');
   });
 

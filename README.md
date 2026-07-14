@@ -101,7 +101,7 @@ await takt.stats.timeseries({
 
 Use `from`/`to` (ISO dates) instead of `period` for a custom window.
 
-`segment[].dim` and `segment[].op` are typed unions (`SegmentDimension` / `SegmentOperator`), so your editor autocompletes them and the compiler rejects non-filterable names. Filterable dimensions: `pages`, `sources`, `countries`, `regions`, `cities`, `os`, `browsers`, `devices`, `utm_source`, `utm_medium`, `utm_campaign` (note the plural — the singular `page`/`source` forms are not filterable). Operators: `is`, `not`.
+`dimension` (breakdown), `segment[].dim` and `segment[].op` are typed unions (`StatsDimension` / `SegmentOperator`), so your editor autocompletes them and the compiler rejects invalid names. Dimensions: `pages`, `sources`, `countries`, `regions`, `cities`, `os`, `browsers`, `devices`, `utm_source`, `utm_medium`, `utm_campaign` (note the plural — the singular `page`/`source` forms are not valid). Segment operators: `is`, `not`.
 
 ## Error handling
 
