@@ -11,6 +11,8 @@ export type {
   StatsTimePoint,
   StatsBreakdown,
   StatsBreakdownRow,
+  StatsBreakdowns,
+  StatsExportRow,
   StatsRealtime,
   StatsGoals,
   GoalConversion,

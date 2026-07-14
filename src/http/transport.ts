@@ -14,6 +14,11 @@ export interface RequestOptions {
   query?: URLSearchParams;
   body?: unknown;
   signal?: AbortSignal;
+  // Valeur de l'en-tête Accept (défaut application/json). Sert aux exports CSV.
+  accept?: string;
+  // Renvoie le corps brut (res.text()) au lieu de le parser en JSON. Utilisé par
+  // l'export CSV, dont la réponse n'est pas du JSON.
+  raw?: boolean;
 }
 
 const MAX_BACKOFF_MS = 2000;
@@ -37,7 +42,7 @@ export default class HttpTransport {
     const url = this.#url(path, options.query);
     const headers: Record<string, string> = {
       authorization: `Bearer ${this.#apiKey}`,
-      accept: 'application/json',
+      accept: options.accept ?? 'application/json',
     };
     let body: string | undefined;
     if (options.body !== undefined) {
@@ -58,7 +63,7 @@ export default class HttpTransport {
 
       try {
         const res = await this.#fetch(url, { method, headers, body, signal: controller.signal });
-        if (res.ok) return (await res.json()) as T;
+        if (res.ok) return (options.raw ? await res.text() : await res.json()) as T;
         if (attempt < this.#retries && this.#retryable(res.status)) {
           await this.#sleep(this.#delay(attempt, res));
           continue;

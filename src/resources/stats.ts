@@ -1,10 +1,13 @@
 import type HttpTransport from '../http/transport';
 import type { RequestOptions } from '../http/transport';
 import type { StatsQuery } from '../query';
+import TaktError from '../errors';
 import type {
   StatsSummary,
   StatsTimeseries,
   StatsBreakdown,
+  StatsBreakdowns,
+  StatsExportRow,
   StatsRealtime,
   StatsGoals,
   FunnelReports,
@@ -21,9 +24,13 @@ export interface CallOptions {
 export default class StatsResource {
   readonly #http: HttpTransport;
   readonly #base: string;
+  readonly #domain: string;
+  readonly #org?: string;
 
-  constructor(http: HttpTransport, domain: string) {
+  constructor(http: HttpTransport, domain: string, org?: string) {
     this.#http = http;
+    this.#domain = domain;
+    this.#org = org;
     this.#base = `/sites/${encodeURIComponent(domain)}/stats`;
   }
 
@@ -37,6 +44,19 @@ export default class StatsResource {
 
   breakdown(query: StatsQuery & { dimension: string }, options?: CallOptions): Promise<StatsBreakdown> {
     return this.#get('breakdown', query, options);
+  }
+
+  // Plusieurs classements en une requête (calculés en parallèle côté serveur,
+  // même cache que breakdown). Renvoie une carte indexée par dimension.
+  breakdowns(
+    dimensions: string[],
+    query: StatsQuery = {},
+    options?: CallOptions,
+  ): Promise<StatsBreakdowns> {
+    if (dimensions.length === 0) {
+      throw new TaktError(0, 'config_invalide', 'au moins une dimension est requise');
+    }
+    return this.#get('breakdowns', query, options, { dimensions: dimensions.join(',') });
   }
 
   realtime(options?: CallOptions): Promise<StatsRealtime> {
@@ -78,6 +98,30 @@ export default class StatsResource {
 
   revenue(event: string, query: StatsQuery = {}, options?: CallOptions): Promise<RevenueByCurrency> {
     return this.#get('revenue', query, options, { event });
+  }
+
+  // Export du classement des pages. Format csv (défaut) => chaîne CSV brute ;
+  // format json => lignes typées. Route org-scopée : nécessite `org` au client.
+  export(query?: StatsQuery & { format?: 'csv' }, options?: CallOptions): Promise<string>;
+  export(query: StatsQuery & { format: 'json' }, options?: CallOptions): Promise<StatsExportRow[]>;
+  export(
+    query: StatsQuery & { format?: 'csv' | 'json' } = {},
+    options?: CallOptions,
+  ): Promise<string | StatsExportRow[]> {
+    if (!this.#org) {
+      throw new TaktError(0, 'config_invalide', 'org requis pour export : fournissez options.org au client');
+    }
+    const { format = 'csv', ...rest } = query;
+    const params = StatsResource.#params(rest);
+    params.set('format', format);
+    const path = `/orgs/${encodeURIComponent(this.#org)}/sites/${encodeURIComponent(this.#domain)}/stats/export`;
+    const init: RequestOptions = { query: params };
+    if (options?.signal) init.signal = options.signal;
+    if (format === 'csv') {
+      init.accept = 'text/csv';
+      init.raw = true;
+    }
+    return this.#http.request('GET', path, init);
   }
 
   #get<T>(

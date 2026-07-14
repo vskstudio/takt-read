@@ -6,6 +6,13 @@ export interface TaktClientOptions {
   apiKey: string;
   domain: string;
   /**
+   * Org slug that owns `domain`. Optional — only required by `stats.export()`, whose route is
+   * org-scoped (`/orgs/:org/sites/:domain/stats/export`). Every other stats method is
+   * domain-scoped and ignores it. Calling `export()` without it throws a `config_invalide`
+   * `TaktError`.
+   */
+  org?: string;
+  /**
    * Root of the Takt read API — the value the resource paths (`/sites/:domain/stats/...`) are
    * appended to, so it must include the API prefix. Optional — defaults to the hosted Takt read
    * API root (`https://taktlytics.com/api/v1`) so the SDK works out of the box. Provide it to
@@ -54,6 +61,6 @@ export default class TaktClient {
       retries: Math.max(0, options.retries ?? DEFAULT_RETRIES),
     });
 
-    this.stats = new StatsResource(transport, options.domain);
+    this.stats = new StatsResource(transport, options.domain, options.org);
   }
 }

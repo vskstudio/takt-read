@@ -21,6 +21,7 @@ import TaktClient from '@vskstudio/takt-read';
 const takt = new TaktClient({
   apiKey: process.env.TAKT_API_KEY!, // secret — keep it server-side
   domain: 'example.com',
+  org: 'my-org', // optional — only needed for stats.export() (org-scoped route)
   // baseUrl defaults to the hosted Takt read API root (https://taktlytics.com/api/v1).
   // Set it to target a self-hosted instance, e.g. 'https://your-takt-instance.example/api/v1'.
   timeoutMs: 30_000, // optional, default 30s
@@ -46,6 +47,7 @@ All read endpoints live under `takt.stats`. Each method takes an optional final
 | `stats.summary(query?)` | `StatsSummary` |
 | `stats.timeseries(query?)` | `StatsTimeseries` |
 | `stats.breakdown(query & { dimension })` | `StatsBreakdown` |
+| `stats.breakdowns(dimensions, query?)` | `StatsBreakdowns` |
 | `stats.realtime()` | `StatsRealtime` |
 | `stats.goals(query?)` | `StatsGoals` |
 | `stats.funnels(query?)` | `FunnelReports` |
@@ -53,6 +55,26 @@ All read endpoints live under `takt.stats`. Each method takes an optional final
 | `stats.propertyBreakdown(event, key, query?)` | `PropertyBreakdown` |
 | `stats.propertyBreakdownBatch(request, query?)` | `PropertyBatchResponse` |
 | `stats.revenue(event, query?)` | `RevenueByCurrency` |
+| `stats.export(query?)` | `string` (CSV) or `StatsExportRow[]` (JSON) — requires `org` |
+
+```ts
+// Several rankings in one request:
+const { breakdowns } = await takt.stats.breakdowns(['pages', 'sources', 'countries'], {
+  period: '30d',
+});
+console.log(breakdowns.pages.rows, breakdowns.sources.rows);
+
+// Exact figures for one specific URL — segment on the raw pathname:
+const page = await takt.stats.summary({
+  period: '30d',
+  segment: [{ dim: 'page', op: 'is', val: '/servers/1025426969745182741' }],
+});
+console.log(page.visitors, page.pageviews);
+
+// Export the page ranking (needs `org` on the client):
+const csv = await takt.stats.export({ period: '30d' }); // raw CSV string
+const rows = await takt.stats.export({ period: '30d', format: 'json' }); // StatsExportRow[]
+```
 
 ```ts
 const ac = new AbortController();

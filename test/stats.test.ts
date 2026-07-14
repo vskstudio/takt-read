@@ -2,10 +2,13 @@ import { describe, it, expect } from 'vitest';
 import HttpTransport from '../src/http/transport';
 import StatsResource from '../src/resources/stats';
 
-function recorder(body: unknown = {}) {
+function recorder(body: unknown = {}, opts: { org?: string; text?: string } = {}) {
   const calls: { url: string; init: RequestInit }[] = [];
   const fn: typeof fetch = async (input, init) => {
     calls.push({ url: String(input), init: init ?? {} });
+    if (opts.text !== undefined) {
+      return new Response(opts.text, { status: 200, headers: { 'content-type': 'text/csv' } });
+    }
     return new Response(JSON.stringify(body), {
       status: 200,
       headers: { 'content-type': 'application/json' },
@@ -18,7 +21,7 @@ function recorder(body: unknown = {}) {
     timeoutMs: 1000,
     retries: 0,
   });
-  return { stats: new StatsResource(transport, 'example.com'), calls };
+  return { stats: new StatsResource(transport, 'example.com', opts.org), calls };
 }
 
 function urlOf(call: { url: string }): URL {
@@ -89,6 +92,46 @@ describe('StatsResource', () => {
     expect(urlOf(call).pathname).toBe('/api/v1/sites/example.com/stats/property-breakdown/batch');
     expect(call.init.method).toBe('POST');
     expect(call.init.body).toBe('{"items":[{"event":"signup","key":"plan"}]}');
+  });
+
+  it('joins dimensions for the batch breakdowns endpoint', async () => {
+    const r = recorder({ breakdowns: {} });
+    await r.stats.breakdowns(['pages', 'entry_page'], { period: '7d' });
+    const u = urlOf(r.calls[0]!);
+    expect(u.pathname).toBe('/api/v1/sites/example.com/stats/breakdowns');
+    expect(u.searchParams.get('dimensions')).toBe('pages,entry_page');
+    expect(u.searchParams.get('period')).toBe('7d');
+  });
+
+  it('rejects an empty dimensions list without a request', () => {
+    const r = recorder();
+    expect(() => r.stats.breakdowns([])).toThrow(/dimension/);
+    expect(r.calls).toHaveLength(0);
+  });
+
+  it('exports CSV as raw text on the org-scoped route', async () => {
+    const csv = 'label,visitors,pageviews\n/,3,5\n';
+    const r = recorder({}, { org: 'acme', text: csv });
+    const out = await r.stats.export({ period: '30d' });
+    expect(out).toBe(csv);
+    const call = r.calls[0]!;
+    expect(urlOf(call).pathname).toBe('/api/v1/orgs/acme/sites/example.com/stats/export');
+    expect(urlOf(call).searchParams.get('format')).toBe('csv');
+    expect((call.init.headers as Record<string, string>).accept).toBe('text/csv');
+  });
+
+  it('exports JSON rows when format is json', async () => {
+    const rows = [{ label: '/', visitors: 3, pageviews: 5 }];
+    const r = recorder(rows, { org: 'acme' });
+    const out = await r.stats.export({ format: 'json' });
+    expect(out).toEqual(rows);
+    expect(urlOf(r.calls[0]!).searchParams.get('format')).toBe('json');
+  });
+
+  it('requires org for export', () => {
+    const r = recorder();
+    expect(() => r.stats.export()).toThrow(/org requis/);
+    expect(r.calls).toHaveLength(0);
   });
 
   it('escapes the domain in the path', async () => {
