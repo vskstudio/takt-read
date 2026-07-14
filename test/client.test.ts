@@ -29,7 +29,7 @@ describe('TaktClient', () => {
     expect(() => client({ domain: '' })).toThrow(TaktError);
   });
 
-  it('defaults baseUrl to the hosted Takt origin when omitted', async () => {
+  it('defaults baseUrl to the hosted Takt read API root when omitted', async () => {
     const calls: string[] = [];
     const spy: typeof fetch = async (input) => {
       calls.push(String(input));
@@ -37,7 +37,9 @@ describe('TaktClient', () => {
     };
     const takt = new TaktClient({ apiKey: 'sk', domain: 'example.com', fetch: spy });
     await takt.stats.summary();
-    expect(calls[0]).toBe('https://taktlytics.com/sites/example.com/stats/summary');
+    // the default base must include the /api/v1 prefix — otherwise the request hits the marketing
+    // SPA and comes back as HTML, not JSON
+    expect(calls[0]).toBe('https://taktlytics.com/api/v1/sites/example.com/stats/summary');
   });
 
   it('still validates and normalises an explicit baseUrl', async () => {

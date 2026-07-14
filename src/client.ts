@@ -6,10 +6,11 @@ export interface TaktClientOptions {
   apiKey: string;
   domain: string;
   /**
-   * Root of the Takt read API. Optional — defaults to the hosted Takt origin
-   * (`https://taktlytics.com`) so the SDK works out of the box. Provide it to
-   * target a self-hosted instance. When provided it must be a valid http(s)
-   * URL; any trailing slash is stripped.
+   * Root of the Takt read API — the value the resource paths (`/sites/:domain/stats/...`) are
+   * appended to, so it must include the API prefix. Optional — defaults to the hosted Takt read
+   * API root (`https://taktlytics.com/api/v1`) so the SDK works out of the box. Provide it to
+   * target a self-hosted instance (e.g. `https://takt.example.com/api/v1`). When provided it must
+   * be a valid http(s) URL; any trailing slash is stripped.
    */
   baseUrl?: string;
   fetch?: typeof fetch;
@@ -17,7 +18,7 @@ export interface TaktClientOptions {
   retries?: number;
 }
 
-const DEFAULT_BASE_URL = 'https://taktlytics.com';
+const DEFAULT_BASE_URL = 'https://taktlytics.com/api/v1';
 const DEFAULT_TIMEOUT_MS = 30_000;
 const DEFAULT_RETRIES = 2;
 
