@@ -1,5 +1,23 @@
 # @vskstudio/takt-read
 
+## 0.3.0
+
+### Minor Changes
+
+- 13f168b: Initial release: server-only TypeScript SDK for the Takt read API. Class-based architecture — `TaktClient` with a `stats` resource (summary, timeseries, breakdown, realtime, goals, funnels, properties, property breakdown, batch breakdown, revenue), a hardened HTTP transport (configurable timeout, retry with backoff on 429/5xx, `AbortSignal` support, bearer auth), option validation, and `TaktError` for typed error handling. Zero runtime dependencies, ESM + CJS.
+
+### Patch Changes
+
+- 4180c43: Fix the default `baseUrl` so the SDK works out of the box against the hosted API.
+
+  The default pointed at the bare site origin (`https://taktlytics.com`), but resource paths are
+  `/sites/:domain/stats/...` with no `/api/v1` prefix — so an out-of-the-box
+  `new TaktClient({ apiKey, domain })` requested `https://taktlytics.com/sites/...`, which serves the
+  marketing SPA and fails with `TaktError: Unexpected token '<' ... is not valid JSON`. The default is
+  now the hosted read API root (`https://taktlytics.com/api/v1`), matching the `baseUrl` contract
+  (the value paths are appended to). Explicit `baseUrl` values are unaffected — they already had to
+  include `/api/v1`.
+
 ## 0.2.0
 
 ### Minor
