@@ -43,6 +43,16 @@ export interface StatsBreakdown {
   rows: StatsBreakdownRow[];
 }
 
+export interface StatsBreakdowns {
+  breakdowns: Record<string, StatsBreakdown>;
+}
+
+export interface StatsExportRow {
+  label: string;
+  visitors: number;
+  pageviews: number;
+}
+
 export interface StatsRealtime {
   visitors: number;
 }

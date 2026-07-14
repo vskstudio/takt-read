@@ -5,6 +5,7 @@ import StatsResource from './resources/stats';
 export interface TaktClientOptions {
   apiKey: string;
   domain: string;
+  org?: string;
   /**
    * Root of the Takt read API — the value the resource paths (`/sites/:domain/stats/...`) are
    * appended to, so it must include the API prefix. Optional — defaults to the hosted Takt read
@@ -54,6 +55,6 @@ export default class TaktClient {
       retries: Math.max(0, options.retries ?? DEFAULT_RETRIES),
     });
 
-    this.stats = new StatsResource(transport, options.domain);
+    this.stats = new StatsResource(transport, options.domain, options.org);
   }
 }
