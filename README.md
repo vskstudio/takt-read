@@ -67,7 +67,7 @@ console.log(breakdowns.pages.rows, breakdowns.sources.rows);
 // Exact figures for one specific URL — segment on the raw pathname:
 const page = await takt.stats.summary({
   period: '30d',
-  segment: [{ dim: 'page', op: 'is', val: '/servers/1025426969745182741' }],
+  segment: [{ dim: 'pages', op: 'is', val: '/servers/1025426969745182741' }],
 });
 console.log(page.visitors, page.pageviews);
 
@@ -93,13 +93,15 @@ await takt.stats.timeseries({
   compare: true,          // include the previous period
   country: 'FR',
   segment: [
-    { dim: 'browser', op: 'is', val: 'Firefox' },
-    { dim: 'page', op: 'contains', val: '/blog', join: 'or' },
+    { dim: 'browsers', op: 'is', val: 'Firefox' },
+    { dim: 'pages', op: 'not', val: '/blog', join: 'or' },
   ],
 });
 ```
 
 Use `from`/`to` (ISO dates) instead of `period` for a custom window.
+
+`segment[].dim` and `segment[].op` are typed unions (`SegmentDimension` / `SegmentOperator`), so your editor autocompletes them and the compiler rejects non-filterable names. Filterable dimensions: `pages`, `sources`, `countries`, `regions`, `cities`, `os`, `browsers`, `devices`, `utm_source`, `utm_medium`, `utm_campaign` (note the plural — the singular `page`/`source` forms are not filterable). Operators: `is`, `not`.
 
 ## Error handling
 

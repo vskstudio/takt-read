@@ -3,7 +3,14 @@ export type { TaktClientOptions } from './client';
 export { default as TaktError } from './errors';
 export { default as StatsResource } from './resources/stats';
 export type { CallOptions } from './resources/stats';
-export type { StatsQuery, SegmentFilter, Period, Interval } from './query';
+export type {
+  StatsQuery,
+  SegmentFilter,
+  SegmentDimension,
+  SegmentOperator,
+  Period,
+  Interval,
+} from './query';
 export type {
   StatsSummary,
   StatsSummaryFigures,

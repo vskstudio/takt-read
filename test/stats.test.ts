@@ -40,11 +40,11 @@ describe('StatsResource', () => {
 
   it('encodes a single segment without a join', async () => {
     const r = recorder();
-    await r.stats.breakdown({ dimension: 'page', segment: [{ dim: 'country', op: 'is', val: 'FR' }] });
+    await r.stats.breakdown({ dimension: 'page', segment: [{ dim: 'countries', op: 'is', val: 'FR' }] });
     const u = urlOf(r.calls[0]!);
     expect(u.pathname).toBe('/api/v1/sites/example.com/stats/breakdown');
     expect(u.searchParams.get('dimension')).toBe('page');
-    expect(u.searchParams.getAll('segment')).toEqual(['country:is:FR']);
+    expect(u.searchParams.getAll('segment')).toEqual(['countries:is:FR']);
     expect(u.searchParams.getAll('segment_join')).toEqual([]);
   });
 
@@ -52,16 +52,16 @@ describe('StatsResource', () => {
     const r = recorder();
     await r.stats.summary({
       segment: [
-        { dim: 'country', op: 'is', val: 'FR' },
-        { dim: 'browser', op: 'is', val: 'Firefox', join: 'or' },
-        { dim: 'page', op: 'contains', val: '/blog' },
+        { dim: 'countries', op: 'is', val: 'FR' },
+        { dim: 'browsers', op: 'is', val: 'Firefox', join: 'or' },
+        { dim: 'pages', op: 'not', val: '/blog' },
       ],
     });
     const u = urlOf(r.calls[0]!);
     expect(u.searchParams.getAll('segment')).toEqual([
-      'country:is:FR',
-      'browser:is:Firefox',
-      'page:contains:/blog',
+      'countries:is:FR',
+      'browsers:is:Firefox',
+      'pages:not:/blog',
     ]);
     expect(u.searchParams.getAll('segment_join')).toEqual(['or', 'and']);
   });
