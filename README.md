@@ -1,5 +1,7 @@
 # @vskstudio/takt-read
 
+
+> 📚 **Documentation** — [taktlytics.com/docs/reference/takt-read](https://taktlytics.com/docs/reference/takt-read)
 Server-only TypeScript SDK for the Takt read API. Query your analytics — summary, timeseries, breakdowns, realtime, goals, funnels, custom properties and revenue — with a typed client.
 
 > **Server-only.** Your read API key is a secret. Use this SDK on a server (API route, cron, backend service) — never ship it to a browser bundle.
